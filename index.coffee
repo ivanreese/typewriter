@@ -66,10 +66,12 @@ keys = ["_"]
 
 
 window.addEventListener "keydown", (e)->
-
   if e.metaKey and e.key is "v"
     e.preventDefault()
-    console.log await navigator.clipboard.readText()
+    text = await navigator.clipboard.readText()
+    if text?.length > 0
+      keys = text.split("")
+    return render()
 
   # Change font
   if e.ctrlKey
@@ -81,11 +83,13 @@ window.addEventListener "keydown", (e)->
     return
 
   # Remove the cursor
-  keys.pop()
+  keys.pop() if keys.at(-1) is "_"
 
   # Update the array of keys that have been typed
   if e.key is "Backspace"
     keys.pop()
+  else if e.key is "Enter"
+    keys.push "\n"
   else
     keys.push e.key
 
@@ -106,7 +110,7 @@ render = ()->
 
 
 drawKey = (k)->
-  if k is "Enter" then return newline()
+  if k is "\n" then return newline()
   if k is " " then return adv()
 
   [x, y] = getCharPosInAtlas k
