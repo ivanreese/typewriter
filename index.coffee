@@ -1,23 +1,26 @@
+# Initialize the drawing canvas
 elm = document.querySelector "canvas"
 ctx = elm.getContext "2d"
 
+# Size the drawing canvas, accounting for DPI
 w = elm.offsetWidth
 h = elm.offsetHeight
-
 dpi = window.devicePixelRatio
 elm.width = w * dpi
 elm.height = h * dpi
+ctx.scale dpi, dpi
 
-ctx.scale(dpi, dpi)
+# We assume that the provided glyph images will be an atlas of characters arranged in this pattern
+atlasLayout = "!\"#$%_&'()*+ 1234567890-= QWERTYUIOP¼ qwertyuiop½ ASDFGHJKL:@ asdfghjkl;¢ ZXCVBNM,.? zxcvbnm,./".split /\s/
 
-chars = "!\"#$%_&'()*+ 1234567890-= QWERTYUIOP¼ qwertyuiop½ ASDFGHJKL:@ asdfghjkl;¢ ZXCVBNM,.? zxcvbnm,./".split /\s/
-
-getGridPos = (c)->
-  for row, y in chars
+# This function returns the x,y position within the atlas for a given character, or null if the character isn't in the atlas
+getCharPosInAtlas = (c)->
+  for row, y in atlasLayout
     x = row.indexOf c
-    return [x, y] if x isnt -1
+    if x isnt -1 then return [x, y]
   [null, null]
 
+# This image stores the currently-loaded glyph atlas
 img = null
 
 loadImg = (src)->
@@ -25,6 +28,7 @@ loadImg = (src)->
   img.src = src
   img.onload = ()-> render()
 
+# By default, load the regular weight
 loadImg "regular.jpg"
 
 # Top left corner in img
@@ -60,6 +64,7 @@ adv = ()->
 # The _ is the cursor.
 keys = ["_"]
 
+
 window.addEventListener "keydown", (e)->
 
   # Change font
@@ -83,6 +88,7 @@ window.addEventListener "keydown", (e)->
 
   render()
 
+
 render = ()->
   # Reset — we'll re-draw the whole thing every time
   ctx.clearRect 0, 0, w, h
@@ -92,11 +98,12 @@ render = ()->
   # Draw all the keys
   drawKey k for k in keys
 
+
 drawKey = (k)->
   if k is "Enter" then return newline()
   if k is " " then return adv()
 
-  [x, y] = getGridPos k
+  [x, y] = getCharPosInAtlas k
   return unless x? and y?
 
   x = sx + ox * x
