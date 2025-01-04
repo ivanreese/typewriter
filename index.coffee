@@ -25,11 +25,11 @@ img = null
 
 loadImg = (src)->
   img = new Image()
-  img.src = src
+  img.src = "glyphs/" + src + ".png"
   img.onload = ()-> render()
 
 # By default, load the regular weight
-loadImg "regular.jpg"
+loadImg "regular"
 
 # Top left corner in img
 sx = 65
@@ -67,11 +67,17 @@ keys = ["_"]
 
 window.addEventListener "keydown", (e)->
 
+  if e.metaKey and e.key is "v"
+    e.preventDefault()
+    console.log await navigator.clipboard.readText()
+
   # Change font
   if e.ctrlKey
-    if e.key is "1" then loadImg "light.jpg"
-    if e.key is "2" then loadImg "regular.jpg"
-    if e.key is "3" then loadImg "double.jpg"
+    if e.key is "1" then loadImg "light"
+    if e.key is "2" then loadImg "regular"
+    if e.key is "3" then loadImg "double"
+    if e.key is "4" then loadImg "light-red"
+    if e.key is "5" then loadImg "regular-red"
     return
 
   # Remove the cursor
