@@ -10,6 +10,11 @@ elm.width = w * dpi
 elm.height = h * dpi
 ctx.scale dpi, dpi
 
+# Chars have a lot of white space around them,
+# which can overlap if we use negative tracking/leading,
+# so this compensates for that.
+ctx.globalCompositeOperation = "darken"
+
 # We assume that the provided glyph images will be an atlas of characters arranged in this pattern
 atlasLayout = "!\"#$%_&'()*+ 1234567890-= QWERTYUIOP¼ qwertyuiop½ ASDFGHJKL:@ asdfghjkl;¢ ZXCVBNM,.? zxcvbnm,./".split /\s/
 
@@ -50,14 +55,18 @@ dy = p
 dw = 140 / 4
 dh = 210 / 4
 
+# These adjust the spacing between chars
+tracking = -10
+leading = -20
+
 # Advance the cursor to the beginning of the next line
 newline = ()->
   dx = p
-  dy += dh+p
+  dy += dh + p + leading
 
 # Advance the cursor by one space
 adv = ()->
-  dx += dw+p
+  dx += dw + p + tracking
   if dx + dw >= w then newline()
 
 # Store all the keys that have been typed, so we can re-render from scratch every time.
