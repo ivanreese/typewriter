@@ -2,19 +2,6 @@
 elm = document.querySelector "canvas"
 ctx = elm.getContext "2d"
 
-# Size the drawing canvas, accounting for DPI
-w = elm.offsetWidth
-h = elm.offsetHeight
-dpi = window.devicePixelRatio
-elm.width = w * dpi
-elm.height = h * dpi
-ctx.scale dpi, dpi
-
-# Chars have a lot of white space around them,
-# which can overlap if we use negative tracking/leading,
-# so this compensates for that.
-ctx.globalCompositeOperation = "darken"
-
 # We assume that the provided glyph images will be an atlas of characters arranged in this pattern
 atlasLayout = "!\"#$%_&'()*+ 1234567890-= QWERTYUIOP¼ qwertyuiop½ ASDFGHJKL:@ asdfghjkl;¢ ZXCVBNM,.? zxcvbnm,./".split /\s/
 
@@ -56,8 +43,8 @@ dw = 140 / 4
 dh = 210 / 4
 
 # These adjust the spacing between chars
-tracking = -10
-leading = -20
+tracking = -16
+leading = -8
 
 # Advance the cursor to the beginning of the next line
 newline = ()->
@@ -70,8 +57,24 @@ adv = ()->
   if dx + dw >= w then newline()
 
 # Store all the keys that have been typed, so we can re-render from scratch every time.
+# You can put any text in the string to pre-populate the page.
 # The _ is the cursor.
-keys = ["_"]
+keys = "_".split ""
+
+# Size the drawing canvas, accounting for DPI
+w = (dw + tracking + p) * 52
+h = window.innerHeight - 200
+dpi = window.devicePixelRatio
+elm.width = w * dpi
+elm.height = h * dpi
+elm.style.width = w
+elm.style.height = h
+ctx.scale dpi, dpi
+
+# Chars have a lot of white space around them,
+# which can overlap if we use negative tracking/leading,
+# so this compensates for that.
+ctx.globalCompositeOperation = "darken"
 
 
 window.addEventListener "keydown", (e)->
@@ -127,6 +130,9 @@ drawKey = (k)->
 
   x = sx + ox * x
   y = sy + oy * y
+
+  # the atlases are slightly tilted
+  y -= x/200
 
   ctx.drawImage img, x, y, 210, 315, dx, dy, dw, dh
 
