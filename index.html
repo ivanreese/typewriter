@@ -1,16 +1,51 @@
-<canvas></canvas>
 <style>
   body {
     display: grid;
     place-content: center;
-    margin: 0;
+    margin: 1em;
     background: hsl(20 10% 90%);
   }
   canvas {
     display: block;
+    width: 100%;
+    max-width: 64em;
+    /* height: auto; */
     background: white;
-    padding: 4em;
+    border: 2em solid white;
+  }
+  div {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(3, auto);
+    grid-template-columns: 1fr auto;
+    gap: .5em 1em;
+    margin-bottom: 1em;
+  }
+  label > * {
+    display: block;
+  }
+  label:first-child {
+    width: 100%;
+    grid-row: span 3;
+  }
+  textarea {
+    width: 100%;
   }
 </style>
+<div>
+  <label>Text <textarea rows="8"></textarea></label>
+  <label>Width (Chars) <input id="width" type="number" value="52" min="1"></label>
+  <label>Tracking <input id="tracking" type="number" value="-16"></label>
+  <label>Leading <input id="leading" type="number" value="-8"></label>
+  <label>Font <select id="font">
+    <option>regular</option>
+    <option>light</option>
+    <option>double</option>
+    <option>regular-red</option>
+    <option>light-red</option>
+  </select></label>
+  <input id="download" type="button" value="Save">
+</div>
+<canvas></canvas>
 <script type="text/coffeescript" src="index.coffee"></script>
 <script src="coffeescript.js"></script>
