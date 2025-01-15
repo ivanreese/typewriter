@@ -1,51 +1,77 @@
 <style>
+  * { box-sizing: border-box; }
+
   body {
     display: grid;
-    place-content: center;
-    margin: 1em;
-    background: hsl(20 10% 90%);
+    height: 100%;
+    place-items: center;
+    overflow: auto;
+    margin: 0;
+    font-family: system-ui;
+    background: hsl(40 20% 90%);
   }
+
+  section {
+    display: grid;
+    padding: 1em;
+    gap: 1em;
+  }
+
   canvas {
     display: block;
     width: 100%;
     max-width: 64em;
-    /* height: auto; */
+    padding: 2em 2em 1.3em;
     background: white;
-    border: 2em solid white;
+    box-shadow: 0 .5em 1em #0001;
   }
+
   div {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(3, auto);
-    grid-template-columns: 1fr auto;
-    gap: .5em 1em;
-    margin-bottom: 1em;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1em;
   }
-  label > * {
-    display: block;
+
+  input[type="number"] {
+    width: 4em;
   }
-  label:first-child {
-    width: 100%;
-    grid-row: span 3;
+
+  input, select {
+    font: inherit;
+    margin-left: .3em;
   }
+
   textarea {
-    width: 100%;
+    min-height: 12em;
+    font: inherit;
+    padding: .5em;
+    border: 1px solid #0001;
+    background: #fff5;
+    box-shadow: 0 .5em 1em #0001;
+    overscroll-behavior: contain;
+    resize: vertical;
   }
 </style>
-<div>
-  <label>Text <textarea rows="8"></textarea></label>
-  <label>Width (Chars) <input id="width" type="number" value="52" min="1"></label>
-  <label>Tracking <input id="tracking" type="number" value="-16"></label>
-  <label>Leading <input id="leading" type="number" value="-8"></label>
-  <label>Font <select id="font">
-    <option>regular</option>
-    <option>light</option>
-    <option>double</option>
-    <option>regular-red</option>
-    <option>light-red</option>
-  </select></label>
-  <input id="download" type="button" value="Save">
-</div>
-<canvas></canvas>
-<script type="text/coffeescript" src="index.coffee"></script>
-<script src="coffeescript.js"></script>
+
+<section>
+  <canvas></canvas>
+  <div>
+    <label>Width (Chars) <input id="width" type="number" value="52" min="1"></label>
+    <label>Tracking <input id="tracking" type="number" value="-16"></label>
+    <label>Leading <input id="leading" type="number" value="-8"></label>
+    <label>Font <select id="font">
+      <option>regular</option>
+      <option>light</option>
+      <option>double</option>
+      <option>regular-red</option>
+      <option>light-red</option>
+    </select></label>
+    <input id="download" type="button" value="Save">
+  </div>
+  <textarea></textarea>
+</section>
+
+  <script type="text/coffeescript" src="index.coffee"></script>
+  <script src="coffeescript.js"></script>
