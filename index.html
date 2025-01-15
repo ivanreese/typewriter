@@ -3,75 +3,143 @@
 
   body {
     display: grid;
-    height: 100%;
     place-items: center;
-    overflow: auto;
+    /* font-size: 11px; */
+    height: 100%;
     margin: 0;
     font-family: system-ui;
     background: hsl(40 20% 90%);
+    overflow: auto;
   }
 
   section {
-    display: grid;
-    padding: 1em;
-    gap: 1em;
+    width: 100%;
+    max-width: 72em;
+    padding: .5em;
   }
 
   canvas {
     display: block;
-    width: 100%;
-    max-width: 64em;
-    padding: 2em 2em 1.3em;
+    margin-inline: auto;
+  }
+
+  canvas.text {
+    max-width: calc(100% - 8em);
     background: white;
-    box-shadow: 0 .5em 1em #0001;
+    box-shadow: 0 .5px 1px #0001;
+    image-rendering: pixelated;
   }
 
-  div {
-    display: flex;
-    flex-flow: row wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 1em;
+  canvas.ruler {
+    max-width: calc(100% - 5em);
   }
 
-  input[type="number"] {
-    width: 4em;
+  .ui {
+    position: sticky;
+    bottom: 1em;
+    z-index: 1;
+    border-radius: 1em;
+    padding: 0 1.5em 1.5em;
+    background: hsl(30, 5%, 30%);
   }
 
-  input, select {
-    font: inherit;
-    margin-left: .3em;
+  [type=number] {
+    /* Remove number spinners */
+    -moz-appearance: textfield;
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button { margin: 0; -webkit-appearance: none; }
   }
 
   textarea {
-    min-height: 12em;
-    font: inherit;
-    padding: .5em;
-    border: 1px solid #0001;
-    background: #fff5;
-    box-shadow: 0 .5em 1em #0001;
+    width: 100%;
+    font-size: 2em;
+    padding-inline: 5.5em;
+    margin-block: 1em;
+    border: none;
+    font-family: monospace;
+    color: white;
+    background: none;
+    box-shadow: 0 .5em 2em #00000003 inset;
+    outline: none;
     overscroll-behavior: contain;
-    resize: vertical;
+    resize: none;
   }
+
+  .buttons {
+    display: flex;
+    gap: 1em;
+  }
+
+  button {
+    border: none;
+    border-radius: 1em;
+    font: inherit;
+    font-size: 1rem;
+    background: hsl(38, 1%, 45%);
+    cursor: pointer;
+    appearance: none;
+  }
+
+  button.active {
+    background: hsl(18, 2%, 56%);
+  }
+
+  .toggle {
+    position: relative;
+    box-sizing: content-box;
+    width: 40px;
+    height: 20px;
+    margin: 0;
+    margin-right: auto;
+    border: 4px solid hsl(18, 2%, 42%);
+    border-radius: 24px;
+    background: hsl(28, 3%, 14%);
+    box-shadow: 0 0 0 2px #0003 inset;
+    transition: background-color .1s;
+    will-change: background-color;
+    appearance: none;
+    cursor: pointer;
+
+    &:checked {
+      background: hsl(0, 59%, 27%);
+    }
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 10px;
+      background: hsl(28, 1%, 48%);
+      transition: left .1s, background-color .1s;
+      will-change: left, background-color;
+      pointer-events: none;
+    }
+
+    &:checked:after {
+      left: calc(100% - 16px - 2px);
+      background: hsl(360, 100%, 40%);
+    }
+  }
+
 </style>
 
 <section>
-  <canvas></canvas>
-  <div>
-    <label>Width (Chars) <input id="width" type="number" value="52" min="1"></label>
-    <label>Tracking <input id="tracking" type="number" value="-16"></label>
-    <label>Leading <input id="leading" type="number" value="-8"></label>
-    <label>Font <select id="font">
-      <option>regular</option>
-      <option>light</option>
-      <option>double</option>
-      <option>regular-red</option>
-      <option>light-red</option>
-    </select></label>
-    <input id="download" type="button" value="Save">
+  <canvas class="text"></canvas>
+  <div class="ui">
+    <canvas class="ruler"></canvas>
+    <textarea></textarea>
+    <div class="buttons">
+      <button id="regular" class="active">Regular</button>
+      <button id="light">Light</button>
+      <button id="double">Double Struck</button>
+      <input type="checkbox" class="toggle" role="switch">
+      <button id="download">Save</button>
+    </div>
   </div>
-  <textarea></textarea>
 </section>
 
-  <script type="text/coffeescript" src="index.coffee"></script>
-  <script src="coffeescript.js"></script>
+<script type="text/coffeescript" src="index.coffee"></script>
+<script src="coffeescript.js"></script>
