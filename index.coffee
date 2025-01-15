@@ -62,7 +62,9 @@ loadAtlas = ()->
 
   atlasImg = new Image()
   atlasImg.src = "glyphs/#{src}.png"
-  atlasImg.onload = ()-> render()
+  atlasImg.onload = ()->
+    render()
+    document.querySelector("section").style.opacity = 1
 
 # By default, load the regular weight
 loadAtlas()
