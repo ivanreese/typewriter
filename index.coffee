@@ -66,9 +66,6 @@ loadAtlas = ()->
     render()
     document.querySelector("section").style.opacity = 1
 
-# By default, load the regular weight
-loadAtlas()
-
 # RENDERING #######################################################################################
 
 # Initialize the drawing canvases
@@ -113,10 +110,14 @@ render = ()->
   ctx.fillStyle = "#f001"
 
   # rulerElm.style.width = Math.min(w / 10, 1200)
-  rulerElm.width = w * scale
-  rulerElm.height = 40
-  rulerCtx.scale scale, 1
-  rulerCtx.clearRect 0, 0, w, 40
+  shrinkX = rulerElm.offsetWidth / rulerElm.width
+  shrinkY = rulerElm.offsetHeight / rulerElm.height
+
+  dpr = window.devicePixelRatio
+  rulerElm.width = rulerElm.offsetWidth * dpr
+  rulerElm.height = rulerElm.offsetHeight * dpr
+  rulerCtx.clearRect 0, 0, w, 80
+  # rulerCtx.scale 1/shrinkX, 1/shrinkY
 
   # Finally, we can draw all the chars
   cx = margin # Reset the cursor position to the top left (again)
@@ -124,11 +125,24 @@ render = ()->
   endOfLine = false
   drawWord i, words, true for _, i in words
 
+  rulerStep = gw * scale * (rulerElm.width - 2) / elm.width
+
+  rulerCtx.beginPath()
+  px = margin * rulerStep + 2
+  rulerCtx.roundRect px|0, -12, (lineWidth - margin*2) * rulerStep, 80, 10
+  rulerCtx.strokeStyle = "hsl(18, 4%, 19%)"
+  rulerCtx.lineWidth = 4
+  rulerCtx.stroke()
+
   for i in [0..lineWidth]
-    rulerCtx.fillStyle = if i % 10 is 0 then "#fff" else "#fff5"
-    height = if i % 10 is 0 then 40 else if i % 5 is 0 then 30 else 20
-    px = i * gw
-    rulerCtx.fillRect px-5, 0, 10, height
+    continue if margin is i or i is lineWidth - margin
+    rulerCtx.fillStyle = if i % 10 is 0 then "hsl(18, 2%, 55%)" else "hsl(18, 2%, 45%)"
+    rulerCtx.fillStyle = "hsl(18, 4%, 25%)" unless margin < i < lineWidth - margin
+    height = if i % 10 is 0 then 35 else if i % 5 is 0 then 25 else 15
+    px = i * rulerStep
+    rulerCtx.fillRect px|0, 0, 4, height
+
+  # console.log shrink
 
 drawWord = (i, words, draw)->
   word = words[i]
@@ -181,6 +195,8 @@ newline = ()->
 
 # INPUT HANDLING ##################################################################################
 
+$ = (q)-> document.querySelector q
+
 # Get the various control elements
 textarea = null
 downloadBtn = null
@@ -191,36 +207,80 @@ setAtlas = (v)->
   atlas = v
   loadAtlas()
 
+ctrls = {
+  lineWidth: (elm)-> updateRuler lineWidth = +elm.value + margin * 2
+  margin: (elm)-> updateRuler margin = +elm.value
+}
+Object.entries(ctrls).map ([n, cb])->
+  e = ctrls[n] = $ "#" + n
+  e.oninput = e.onchange = ()-> cb e
+
 btns = {}
-for name in ["regular", "light", "double"]
-  do (name)->
-    (btns[name] = document.getElementById(name)).onclick = ()-> setAtlas name
-
-
-document.querySelector("#light").onclick = ()-> setAtlas "light"
-document.querySelector("#double").onclick = ()-> setAtlas "double"
-document.querySelector(".toggle").onclick = (e)->
+["regular", "light", "double"].map (n)-> (btns[n] = $ "#" + n).onclick = ()-> setAtlas save "atlas", n
+($ ".toggle").onclick = (e)->
   variant = if e.target.checked then "-red" else ""
+  save "variant", variant
   loadAtlas()
 
-save = (name, v)->
-  localStorage.setItem name, v
-  v
+load = (name, def)-> localStorage.getItem(name) ? save name, def
+save = (name, val)-> localStorage.setItem(name, val) ? val
 
-load = (name, def)->
-  v = localStorage.getItem name
-  save name, v = def unless v?
-  v
+updateRuler = ()->
+  margin = Math.max 1, margin
+  lineWidth = Math.max lineWidth, margin * 2 + 1
+  save "margin", margin
+  save "lineWidth", lineWidth
+  ctrls.margin.value = margin
+  ctrls.lineWidth.value = lineWidth - margin * 2
+  pxPerChar = rulerElm.offsetWidth / lineWidth
+  ctrls.margin.style.left = pxPerChar * margin/2
+  ctrls.margin.style.width = margin.toString().length + ".25em"
+  render()
 
 do ()->
-  (textarea = document.querySelector "textarea").oninput = ()->
-    localStorage.setItem "text", textarea.value
+  (textarea = $ "textarea").oninput = ()->
+    save "text", textarea.value
     render()
-  if text = load "text" then textarea.value = text
+  textarea.value = load "text", ""
 
-  (downloadBtn = document.querySelector "#download").onclick = ()->
+  ($ "#reset").onclick = ()->
+    save "text", textarea.value = ""
+    margin = 6
+    lineWidth = 64
+    updateRuler()
+    ($ ".toggle").checked = false
+    variant = ""
+    setAtlas "regular"
+
+  ($ "#download").onclick = ()->
     link = document.createElement "a"
     link.href = elm.toDataURL()
     link.download = "typewriter.png"
     link.click()
     link.remove()
+
+rulerElm.onpointerdown = (e)->
+  start = e.clientX
+  window.onpointerup = ()-> window.onpointermove = null
+
+  pxPerChar = rulerElm.offsetWidth / lineWidth
+  isMargin = e.offsetX / pxPerChar <= margin
+
+  window.onpointermove = (e)->
+    pxPerChar = rulerElm.offsetWidth / lineWidth
+    charDragDist = (e.clientX - start) / pxPerChar
+    return if Math.abs(charDragDist) < 1
+
+    if isMargin
+      margin += Math.sign charDragDist
+    else
+      lineWidth -= Math.sign charDragDist
+    start += pxPerChar * Math.sign charDragDist
+    updateRuler()
+
+variant = load "variant", ""
+setAtlas load "atlas", "regular"
+($ ".toggle").checked = variant isnt ""
+margin = load "margin", 6
+lineWidth = load "lineWidth", 64
+updateRuler()
