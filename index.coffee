@@ -10,7 +10,7 @@ lineWidth = 64 # this works out to A5 paper width
 
 # These create empty space…
 margin = 6 # left and right — measure in character widths
-padding = 1.5 # on the top and bottom — measure in line heights
+padding = 3 # on the top and bottom — measure in line heights
 
 # ATLAS ###########################################################################################
 
@@ -94,11 +94,17 @@ render = ()->
   drawWord i, words, false for _, i in words
   h = (cy + 1 + padding) * lh # Measure the height of the canvas
 
+  # Before we resize the canvas, check if we're scrolled to the bottom.
+  oldHeight = elm.height
+
   # Now that we've got the width and height, we can update the canvas
   # elm.style.width = Math.min(w / 10, 1200)
   elm.width = w * scale
   elm.height = h * scale
   ctx.scale scale, scale # Have to set this every time we resize the canvas.
+
+  if oldHeight < elm.height
+    document.body.scrollBy top: elm.height - oldHeight
 
   # The extra padding on chars means they overlap, so this allows them to overlap nicely
   ctx.globalCompositeOperation = "darken" # Have to set this every time we resize the canvas.
